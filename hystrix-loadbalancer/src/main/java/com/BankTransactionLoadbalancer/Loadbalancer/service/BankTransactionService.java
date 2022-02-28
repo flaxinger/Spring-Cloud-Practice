@@ -12,11 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -33,7 +31,7 @@ public class BankTransactionService {
     private static String baseUrl = "http://bank-transaction";
 
 
-    public Mono<String> uploadCSVOrig(FilePart file) throws IOException {
+    public Mono<String> uploadCSV(FilePart file) throws IOException {
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file);
@@ -48,7 +46,6 @@ public class BankTransactionService {
                 .uri(uri)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
-//                .body(BodyInserters.fromPublisher(file.content(), DataBuffer.class))
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -57,7 +54,7 @@ public class BankTransactionService {
 
     public Mono<String> findTransactionByUser(String userId, RequestDto.RequestByUser requestByUser) {
 
-        String uri = baseUrl+userId+"/transactions"+requestByUser.toString();
+        String uri = baseUrl+"/"+userId+"/transactions"+requestByUser.toString();
         log.info("Making request to "+uri);
 
         return loadBalancedWebClientBuilder
@@ -86,71 +83,6 @@ public class BankTransactionService {
                 .retrieve()
                 .bodyToMono(String.class);
 
-
-    }
-
-    public Mono<String> uploadCSV(FilePart file) throws IOException {
-//    public Mono<String> uploadCSV(Mono<FilePart> file) throws IOException {
-
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-//        builder.part("file", file.cast(MultipartFile.class).then(data -> data));
-        builder.asyncPart("file", file.content(), DataBuffer.class);
-//        builder.part("file", file.flatMap(filePart ->
-//                filePart.content().map(dataBuffer -> {
-//                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
-//                    dataBuffer.read(bytes);
-//                    DataBufferUtils.release(dataBuffer);
-//
-//                    return bytes;
-//                }));
-
-
-        String uri = baseUrl+"/bt/upload";
-//        String uri = baseUrl+"/bt/upload";
-
-        log.info("Making request to "+ uri);
-//        return file
-//                .cast(MultipartFile.class)
-//                .then(data ->{
-//                    loadBalancedWebClientBuilder
-//                            .exchangeStrategies(exchangeStrategies)
-//                            .build()
-//                            .post()
-//                            .uri(uri)
-//                            .contentType(MediaType.MULTIPART_FORM_DATA)
-//                            .body(BodyInserters.fromMultipartData(data))
-//                            .retrieve()
-//                            .bodyToMono(String.class);
-//                });
-
-
-//            return file
-//                .flatMap(filePart -> {
-//                    return loadBalancedWebClientBuilder
-//                            .exchangeStrategies(exchangeStrategies)
-//                            .build()
-//                            .post()
-//                            .uri(uri)
-//                            .body(BodyInserters.fromPublisher(filePart.content(), DataBuffer.class))
-//                            .retrieve()
-//                            .bodyToMono(String.class);
-////                          .exchange()
-////                            .flatMap(clientResponse -> {
-////                                log.info("got response from "+uri);
-////                                return Mono.just(clientResponse);
-////                            });
-//                });
-
-        return loadBalancedWebClientBuilder
-                .exchangeStrategies(exchangeStrategies)
-                .build()
-                .post()
-                .uri(uri)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-//                .body(BodyInserters.fromPublisher(file.content(), DataBuffer.class))
-                .retrieve()
-                .bodyToMono(String.class);
 
     }
 

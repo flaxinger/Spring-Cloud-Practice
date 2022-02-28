@@ -9,6 +9,7 @@ import com.BankTransactionApp.BankTransactionApp.web.banktransaction.domain.Bank
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.BankTransactionDto;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.ResponseDto;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.repository.BankTransactionQueryRepository;
+import com.BankTransactionApp.BankTransactionApp.web.banktransaction.repository.BankTransactionRepository;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.util.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -29,6 +27,8 @@ public class BankTransactionServiceImpl implements BankTransactionService{
     private final BankTransactionQueryRepository bankTransactionQueryRepository;
     private final AccountService accountService;
     private final BankService bankService;
+    private final BankTransactionRepository bankTransactionRepository;
+
     private final static String errorMsg = "Error occurred in Bank Transaction Service [%s:] ";
 
     @Override
@@ -48,7 +48,7 @@ public class BankTransactionServiceImpl implements BankTransactionService{
     public String saveCSVBatch(Set<AccountDto> accountDtoSet, Set<BankTransactionDto> bankTransactionDtos) {
 
         // Bank Entity 전체 조회 후 맵에 저장
-        List<Bank> banks = bankService.findAll();
+        List<Bank> banks = bankService.findAllEntity();
         Map<String, Bank> bankMap = new HashMap<>();
 
         banks.forEach(bank -> {
@@ -82,9 +82,9 @@ public class BankTransactionServiceImpl implements BankTransactionService{
         return "All transactions were successfully inserted";
     }
 
-
-    public String fallbackSaveCSVBatch(Set<AccountDto> accountDtoSet, Set<BankTransactionDto> bankTransactionDtos, Throwable t) {
-        log.error(String.format(errorMsg, "saveCSVBatch(...)"), t);
-        return "Error occurred in uploading csv file.";
+    @Override
+    public Optional<BankTransactionDto> findById(Long id) {
+        Optional<BankTransaction> bankTransaction = bankTransactionRepository.findById(id);
+        return bankTransaction.isEmpty() ? Optional.empty() : Optional.of(BankTransactionDto.fromEntity(bankTransaction.get()));
     }
 }

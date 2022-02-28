@@ -24,7 +24,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void addAccount(AccountDto accountDto) {
 
-        Optional<Account> account = accountRepository.findById(String.valueOf(accountDto.getId()));
+        Optional<Account> account = accountRepository.findById(accountDto.getId());
 
         if(account.isEmpty()){
             accountRepository.save(AccountDto.toEntity(accountDto));
@@ -36,6 +36,13 @@ public class AccountServiceImpl implements AccountService {
     public List<Account> saveBatch(Set<AccountDto> accountDtoSet) {
         Set<Account> accounts = accountDtoSet.stream().map(accountDto -> AccountDto.toEntity(accountDto)).collect(Collectors.toSet());
         return accountRepository.saveAll(accounts);
+    }
+
+    @Override
+    @Transactional
+    public Optional<AccountDto> findById(Long id){
+        Optional<Account> account = accountRepository.findById(id);
+        return account.isEmpty() ? Optional.empty() : Optional.of(AccountDto.fromEntity(account.get()));
     }
 
 }

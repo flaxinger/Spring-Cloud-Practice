@@ -8,6 +8,8 @@ import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.Request
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.ResponseDto;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.service.BankTransactionService;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.util.TransactionType;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -26,10 +28,13 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping("/bt")
-@RequiredArgsConstructor
 public class BankTransactionController {
 
     private final BankTransactionService bankTransactionService;
+
+    public BankTransactionController(BankTransactionService bankTransactionService){
+        this.bankTransactionService = bankTransactionService;
+    }
 
     @PostMapping("/upload")
     public Response.Item<String> uploadCSV(@RequestParam("file") MultipartFile file) throws IOException {

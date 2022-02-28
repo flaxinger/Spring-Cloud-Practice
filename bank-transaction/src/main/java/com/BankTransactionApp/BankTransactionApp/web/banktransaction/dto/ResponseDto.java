@@ -3,9 +3,11 @@ package com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.util.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
+@ToString
 @Getter
 @AllArgsConstructor
 public class ResponseDto {

@@ -7,6 +7,7 @@ import com.BankTransactionApp.BankTransactionApp.web.banktransaction.util.Transa
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface BankTransactionService {
@@ -16,4 +17,6 @@ public interface BankTransactionService {
     public List<ResponseDto> findTransactionByBank(String bankCode, LocalDate localDate, TransactionType transactionType);
 
     public String saveCSVBatch(Set<AccountDto> accountDtoSet, Set<BankTransactionDto> bankTransactionDtos);
+
+    public Optional<BankTransactionDto> findById(Long id);
 }

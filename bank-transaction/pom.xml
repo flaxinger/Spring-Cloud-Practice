@@ -14,6 +14,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>bank-transaction</name>
 	<description>Spring API for bank transactions</description>
+	<packaging>jar</packaging>
 	<properties>
 		<java.version>11</java.version>
 		<spring.version>5.2.9.RELEASE</spring.version>
@@ -74,6 +75,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- JPA -->

@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -24,15 +23,12 @@ public class BankTransactionController {
     @CircuitBreaker(name = "upload", fallbackMethod = "uploadCSVFB")
     @PostMapping(value = "/upload")
     public Mono<String> uploadCSV(@RequestPart("file") FilePart file) throws IOException {
-//    public Mono<String> uploadCSV(@RequestPart("file") MultipartFile file) throws IOException {
-//    public Mono<String> uploadCSV(@RequestPart("file") Mono<FilePart> file) throws IOException{
 
         if(file==null) {
             log.warn("file is empty");
             return Mono.empty();
         }
-//        return bankTransactionService.uploadCSV(file);
-        return bankTransactionService.uploadCSVOrig(file);
+        return bankTransactionService.uploadCSV(file);
     }
 
     @GetMapping(value = "/{userId}/transactions")
@@ -50,17 +46,14 @@ public class BankTransactionController {
     }
 
     public Mono<String> uploadCSVFB(FilePart file, Throwable t) throws IOException {
-//        log.error("[Fallback Error] "+t.getMessage());
         return Mono.just(Response.FALLBACK);
     }
 
     public Mono<String> findTransactionByUserFB(String userId, RequestDto.RequestByUser requestByUser, Throwable t) {
-//        log.error("[Fallback Error] "+t.getMessage());
         return Mono.just(Response.FALLBACK);
     }
 
     public Mono<String> findTransactionByBankFB(RequestDto.RequestByBank requestByBank, Throwable t){
-//        log.error("[Fallback Error] "+t.getMessage());
         return Mono.just(Response.FALLBACK);
     }
 

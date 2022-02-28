@@ -30,9 +30,13 @@ public class BankServiceImpl implements BankService{
 
     @Override
     @Transactional
-    public List<Bank> findAll() {
+    public List<Bank> findAllEntity() {
         return bankRepository.findAll();
     }
 
-
+    @Override
+    public Optional<BankDto> findById(String id) {
+        Optional<Bank> bank = bankRepository.findById(id);
+        return bank.isEmpty() ? Optional.empty() : Optional.of(BankDto.fromEntity(bank.get()));
+    }
 }
