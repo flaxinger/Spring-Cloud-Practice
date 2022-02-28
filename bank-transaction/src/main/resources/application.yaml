@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: bank-transaction
+  datasource:
+    url: jdbc:mysql://localhost:3306/BTransaction?characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=true&serverTimezone=Asia/Seoul
+    username: BTransactionApp
+    password: gkqrurrldnjs
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+#      ddl-auto: create
+    show_sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        order_updates: true
+        order_inserts: true
+        jdbc:
+          batch_size: 700
+          batch_versioned_data: true
+        show_sql: false
+    database: mysql
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+  instance:
+    hostname: localhost
