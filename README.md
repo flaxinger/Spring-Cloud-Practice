@@ -52,7 +52,7 @@ Eureka가 서비스 디스커버리를 하고 loadbalancer가 client로 사용 �
 3. Fault Tolerance 적용: <u>Resilience4j</u></br>
 다루는 데이터의 특성으로 미루어 고객 Client뿐 아니라 다른 컴포넌트도 이용할 수 있다고 가정했습니다.
 이에 따라 대용량 처리 시 에러가 발생할 수 있다 생각했고 따라서 Circuit Breaker를 적용해 장애 전파를 막도록 하였습니다.
-초반에 Hystrix를 적용하였지만 Mono, Flux 처리에 있어 Resilience4j가 보다 편리하여 선택하였습니다. 설정은 Default 설정에 가깝습니다.</br>
+초반에 Hystrix를 적용하였지만 Mono, Flux 처리에 있어 Resilience4j가 보다 편리하여 선택하였습니다. 설정은 Default 설정에 가깝습니다.</br></br>
 4. WebClient를 통한 비동기처리: <u>WebClient</u></br>
 LoadBalancer의 API 서버 호출에 있어 WebClient와 RestTemplate을 두고 고민한 결과 비동기처리를 하는 WebClient가 보다 유리하다고 판단하였습니다.
 
