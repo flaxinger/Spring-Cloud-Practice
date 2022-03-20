@@ -54,7 +54,7 @@ public class BankTransactionService {
 
     public Mono<String> findTransactionByUser(String userId, RequestDto.RequestByUser requestByUser) {
 
-        String uri = baseUrl+"/"+userId+"/transactions"+requestByUser.toString();
+        String uri = baseUrl+"/bt/"+userId+"/transactions"+requestByUser.toString();
         log.info("Making request to "+uri);
 
         return loadBalancedWebClientBuilder

@@ -19,6 +19,7 @@ spring:
         jdbc:
           batch_size: 700
           batch_versioned_data: true
+          generate_statistics: true
         show_sql: false
     database: mysql
   servlet:
