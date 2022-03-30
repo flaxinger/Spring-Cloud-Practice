@@ -27,7 +27,6 @@
 * Resilience4j
 * QueryDSL
 * Mysql
-* Python or VanillaJS(CSV 제출을 위한 테스트 클라이언트)
 
 구체적인 서비스 아키텍처와 API 명세 등은 다음 [소개 문서](docs/1.Introduction.md)에서 확인 가능합니다. 
 
