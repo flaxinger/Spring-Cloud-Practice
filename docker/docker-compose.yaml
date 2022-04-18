@@ -12,6 +12,8 @@ services:
       MYSQL_PASSWORD: gkqrurrldnjs
       MYSQL_ROOT_PASSWORD: secret
       TZ: Asia/Seoul
+    cap_add: #Security Config to avoid "mbind: Operation Not Permitted" Error
+      - SYS_NICE
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci

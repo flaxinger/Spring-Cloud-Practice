@@ -37,4 +37,7 @@ public class Bank implements Persistable<String> {
     public boolean isNew() {
         return true;
     }
+
+    @Override
+    public String toString(){ return "[BankId = "+this.id+", BankName = "+this.bankName+"]";}
 }
