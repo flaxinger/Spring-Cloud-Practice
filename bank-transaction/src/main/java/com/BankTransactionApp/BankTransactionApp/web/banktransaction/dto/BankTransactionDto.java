@@ -50,6 +50,11 @@ public class BankTransactionDto {
                 .build();
     }
 
+    @Override
+    public String toString(){
+        return id+","+date+","+transactionAmount+","+transactionType+","+account.getId()+","+bank.getBankCode()+"\n";
+    }
+
     public static List<BankTransactionDto> fromEntityList(List<BankTransaction> bankTransactions){
         return bankTransactions.stream().map(bankTransaction -> fromEntity(bankTransaction)).collect(Collectors.toList());
     }

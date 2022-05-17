@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,13 +42,13 @@ public class BankTransactionService{
     private Long batchSize;
 
     @Transactional(readOnly = true)
-    public List<ResponseDto> findTransactionByBank(String bankCode, LocalDate localDate, TransactionType transactionType) {
-        return bankTransactionQueryRepository.findByBankDynamicQuery(bankCode, localDate, transactionType);
+    public List<ResponseDto> findTransactionByBank(String bankCode, LocalDate localDate, TransactionType transactionType, int page) {
+        return bankTransactionQueryRepository.findByBankDynamicQuery(bankCode, localDate, transactionType, page);
     }
 
     @Transactional(readOnly = true)
-    public List<ResponseDto> findTransactionByUser(Long userId, LocalDate localDate, TransactionType transactionType) {
-        return bankTransactionQueryRepository.findByUserDynamicQuery(userId, localDate, transactionType);
+    public List<ResponseDto> findTransactionByUser(Long userId, LocalDate localDate, TransactionType transactionType, int page) {
+        return bankTransactionQueryRepository.findByUserDynamicQuery(userId, localDate, transactionType, page);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -64,8 +65,7 @@ public class BankTransactionService{
                 bankMap.get(bankTransactionDto.getBank().getBankCode()).addTransaction(bankTransaction);
                 accountRepository.findById(bankTransactionDto.getAccount().getId()).get().addBankTransaction(bankTransaction);
                 count++;
-                if(count%batchSize==0){
-                    log.info("saving and flushing list size is {}", count);
+                if(count%(batchSize*100)==0){
                     entityManager.flush();
                     bankMap.clear();
                     bankMap.putAll(findAllBankTransformToMap());
@@ -76,11 +76,15 @@ public class BankTransactionService{
             }
 
         }
-
-
         return "All transactions were successfully inserted";
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public String loadData(Set<AccountDto> accountDtoSet, String path){
+        accountService.saveBatch(accountDtoSet);
+        bankTransactionRepository.loadData(path.replace('/','\\'));
+        return "성공적으로 업로드되었습니다.";
+    }
 
     public Optional<BankTransactionDto> findById(Long id) {
         Optional<BankTransaction> bankTransaction = bankTransactionRepository.findById(id);

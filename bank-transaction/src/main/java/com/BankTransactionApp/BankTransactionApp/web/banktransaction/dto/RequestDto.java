@@ -17,6 +17,7 @@ public class RequestDto {
     public static class RequestByUser{
         private String date;
         private String type;
+        private int page;
     }
 
     @Getter
@@ -27,6 +28,7 @@ public class RequestDto {
         private String bank;
         private String date;
         private String type;
+        private int page;
     }
 
     public static LocalDate parseDate(String date){

@@ -8,6 +8,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -19,8 +20,10 @@ import java.util.List;
 public class BankTransactionQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
+    @Value("${flaxinger.page-size}")
+    private int pageSize;
 
-    public List<ResponseDto> findByUserDynamicQuery(Long userId, LocalDate localDate, TransactionType transactionType){
+    public List<ResponseDto> findByUserDynamicQuery(Long userId, LocalDate localDate, TransactionType transactionType, int page){
         return jpaQueryFactory
                 .select(Projections.constructor(ResponseDto.class,
                         QBankTransaction.bankTransaction.id,
@@ -30,14 +33,16 @@ public class BankTransactionQueryRepository {
                         QBankTransaction.bankTransaction.transactionAmount,
                         QBankTransaction.bankTransaction.transactionType))
                 .from(QBankTransaction.bankTransaction)
-                .leftJoin(QBankTransaction.bankTransaction.bank, QBank.bank)
+                .innerJoin(QBankTransaction.bankTransaction.bank, QBank.bank)
                 .where(QBankTransaction.bankTransaction.account.id.eq(userId),
                         eqLocalDate(localDate),
                         eqTransactionType(transactionType))
+                .limit(pageSize)
+                .offset(page*pageSize)
                 .fetch();
     }
 
-    public List<ResponseDto> findByBankDynamicQuery(String bankCode, LocalDate localDate, TransactionType transactionType){
+    public List<ResponseDto> findByBankDynamicQuery(String bankCode, LocalDate localDate, TransactionType transactionType, int page){
         return jpaQueryFactory
                 .select(Projections.constructor(ResponseDto.class,
                         QBankTransaction.bankTransaction.id,
@@ -47,10 +52,12 @@ public class BankTransactionQueryRepository {
                         QBankTransaction.bankTransaction.transactionAmount,
                         QBankTransaction.bankTransaction.transactionType))
                 .from(QBankTransaction.bankTransaction)
-                .leftJoin(QBankTransaction.bankTransaction.bank, QBank.bank)
+                .innerJoin(QBankTransaction.bankTransaction.bank, QBank.bank)
                 .where(eqBank(bankCode),
                         eqLocalDate(localDate),
                         eqTransactionType(transactionType))
+                .limit(pageSize)
+                .offset(page*pageSize)
                 .fetch();
     }
 

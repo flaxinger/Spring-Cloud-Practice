@@ -18,4 +18,6 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --general-log=1
-      - --general-log-file=/var/log/mysql/query.log
+      - --general-log-file=/var/run/mysqld/query.log
+      - --local-infile=1
+      - --bulk_insert_buffer_size=256M
