@@ -13,5 +13,5 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
     @Query(value = "load data concurrent local infile ?1 " +
             "into table bank_transaction " +
             "fields terminated by ',';", nativeQuery = true)
-    public void loadData(String path);
+    public int loadData(String path);
 }

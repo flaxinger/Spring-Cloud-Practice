@@ -80,9 +80,12 @@ public class BankTransactionService{
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public String loadData(Set<AccountDto> accountDtoSet, String path){
+    public String loadData(Set<AccountDto> accountDtoSet, int bankTransactionRowCount, String filePath){
         accountService.saveBatch(accountDtoSet);
-        bankTransactionRepository.loadData(path.replace('/','\\'));
+        int successfullyUploaded = bankTransactionRepository.loadData(filePath);
+        log.info("given csv count = {}, uploaded = {}", bankTransactionRowCount, successfullyUploaded);
+        if(bankTransactionRowCount != successfullyUploaded)
+            throw new IllegalArgumentException("csv 파일에 문제가 있습니다.");
         return "성공적으로 업로드되었습니다.";
     }
 

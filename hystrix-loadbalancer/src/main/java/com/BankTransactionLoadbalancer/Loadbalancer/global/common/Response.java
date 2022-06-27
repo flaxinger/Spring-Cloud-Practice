@@ -8,7 +8,7 @@ import java.util.List;
 public class Response {
 
     private static final String OK_MESSAGE = "transaction unsuccessful";
-    public static final String FALLBACK = "{success: false, message: transaction unsuccessful, length: 1, data: There is an error with the server}";
+    public static final Response.Item FALLBACK = new Item("There is an error with the server");
 
     @Getter
     @ToString

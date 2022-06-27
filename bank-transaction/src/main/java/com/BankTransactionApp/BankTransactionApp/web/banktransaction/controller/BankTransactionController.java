@@ -7,6 +7,7 @@ import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.BankTra
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.RequestDto;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.dto.ResponseDto;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.service.BankTransactionService;
+import com.BankTransactionApp.BankTransactionApp.util.FileSaveAndReader;
 import com.BankTransactionApp.BankTransactionApp.web.banktransaction.util.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,62 +38,34 @@ public class BankTransactionController {
     private Integer batchSize;
     @Value("${flaxinger.upload-directory}")
     private String uploadDir;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
 
     @PostMapping("/upload")
     public Response.Item<String> uploadCSV(@RequestParam("file") MultipartFile file) throws IOException {
 
-        String path = request.getServletContext().getRealPath("/");
-        log.info("path is {}", path);
-        file.transferTo(new File(path));
+        FileSaveAndReader fsr = FileSaveAndReader.setupReader(file, request.getServletContext().getRealPath("/"));
         Set<AccountDto> accountDtos = new HashSet<>();
         Set<BankTransactionDto> bankTransactionDtos = new HashSet<>();
 
         log.info("Got request at uploadCSV");
 
-
-        String csvLine;
-
         if(file.isEmpty()){
             return new Response.Item<>("The given file is empty");
         }
         else{
-//            Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-
-            try(reader){
-                while((csvLine = reader.readLine())!=null){
-                    String[] csvRecord = csvLine.split(",");
-                    AccountDto accountDto = AccountDto.builder()
-                            .id(Long.valueOf(csvRecord[4]))
-                            .name(csvRecord[4]).build();
-
-                    accountDtos.add(accountDto);
-
-                    bankTransactionDtos.add(BankTransactionDto.builder()
-                            .id(Long.parseLong(csvRecord[0], 10))
-                            .date(LocalDate.parse(csvRecord[1]
-                                    +'-'+csvRecord[2]+
-                                    '-'+csvRecord[3], formatter))
-                            .account(accountDto)
-                            .bank(BankDto.builder().bankCode(csvRecord[5]).build())
-                            .transactionAmount(Long.valueOf(csvRecord[6]))
-                            .transactionType(TransactionType.of(csvRecord[7]))
-                            .build());
-
-                    if(bankTransactionDtos.size() == batchSize*300){
-                        long start = System.currentTimeMillis();
-                        bankTransactionService.saveCSVBatch(accountDtos, bankTransactionDtos);
-                        log.info("transaction took {}ms", start - System.currentTimeMillis());
-                        accountDtos.clear();
-                        bankTransactionDtos.clear();
-                    }
+            BankTransactionDto bankTransactionDto;
+            while((bankTransactionDto = fsr.readNextBankTransactionDto())!=null){
+                accountDtos.add(bankTransactionDto.getAccount());
+                bankTransactionDtos.add(bankTransactionDto);
+                if(bankTransactionDtos.size() == batchSize*300){
+                    long start = System.currentTimeMillis();
+                    bankTransactionService.saveCSVBatch(accountDtos, bankTransactionDtos);
+                    log.info("transaction took {}ms", System.currentTimeMillis()-start);
+                    accountDtos.clear();
+                    bankTransactionDtos.clear();
                 }
             }
-            catch (IOException e){
-                log.error("Error occured in uploadCSV:", e.getMessage());
-            }
+            fsr.cleanup();
+            bankTransactionService.saveCSVBatch(accountDtos, bankTransactionDtos);
             return new Response.Item<>("All transactions were saved properly");
         }
     }
@@ -128,12 +101,9 @@ public class BankTransactionController {
     @PostMapping("/upload/loaddata")
     public Response.Item<String> uploadCSVAndLoadData(@RequestParam("file") MultipartFile file) throws IOException {
 
-        String path = request.getServletContext().getRealPath("/");
-        file.transferTo(new File(path));
+        FileSaveAndReader fsr = FileSaveAndReader.setupReader(file, request.getServletContext().getRealPath("/"));
         Set<AccountDto> accountDtos = new HashSet<>();
         log.info("Got request at uploadCSV");
-
-        String csvLine;
 
         if(file.isEmpty()){
             return new Response.Item<>("The given file is empty");
@@ -143,38 +113,29 @@ public class BankTransactionController {
                 new File(uploadDir).mkdir();
                 log.info("{} is created", uploadDir);
             }
-            File uploadFile = new File(uploadDir+'\\'+ LocalDateTime.now().hashCode()+".txt");
-            System.out.println(uploadFile.getAbsolutePath());
+            File uploadFile = new File(uploadDir+File.separator+"bt"+LocalDateTime.now().hashCode()+".txt");
+            log.info("created new file at {}", uploadFile.getAbsolutePath());
             BufferedWriter writer = new BufferedWriter(new FileWriter(uploadFile.getAbsoluteFile()));
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-
+            BankTransactionDto bankTransactionDto;
+            int bankTransactionRowCount=0;
             try(writer){
-                try(reader) {
-                    while ((csvLine = reader.readLine()) != null) {
-                        String[] csvRecord = csvLine.split(",");
-                        AccountDto accountDto = AccountDto.builder()
-                                .id(Long.valueOf(csvRecord[4]))
-                                .name(csvRecord[4]).build();
-
-                        accountDtos.add(accountDto);
-
-                        writer.write(BankTransactionDto.builder()
-                                .id(Long.parseLong(csvRecord[0], 10))
-                                .date(LocalDate.parse(csvRecord[1]
-                                        + '-' + csvRecord[2] +
-                                        '-' + csvRecord[3], formatter))
-                                .account(accountDto)
-                                .bank(BankDto.builder().bankCode(csvRecord[5]).build())
-                                .transactionAmount(Long.valueOf(csvRecord[6]))
-                                .transactionType(TransactionType.of(csvRecord[7]))
-                                .build().toString());
-                    }
+                while ((bankTransactionDto = fsr.readNextBankTransactionDto()) != null) {
+                    bankTransactionRowCount++;
+                    accountDtos.add(bankTransactionDto.getAccount());
+                    writer.write(bankTransactionDto.toString());
                 }
             }
             catch (IOException e){
                 log.error("Error occured in uploadCSV:", e.getMessage());
             }
-            bankTransactionService.loadData(accountDtos, uploadFile.getAbsolutePath());
+            long start = System.currentTimeMillis();
+            try {
+                bankTransactionService.loadData(accountDtos, bankTransactionRowCount, uploadFile.getAbsolutePath());
+            }catch (Exception e){
+                return new Response.Item<>(e.getMessage());
+            }
+            log.info("transaction took {}ms", System.currentTimeMillis()-start);
+            fsr.cleanup();
             uploadFile.delete();
             return new Response.Item<>("업로드 성공");
         }

@@ -1,13 +1,9 @@
 package com.BankTransactionLoadbalancer.Loadbalancer.service;
 
 import com.BankTransactionLoadbalancer.Loadbalancer.controller.BankTransaction.dto.RequestDto;
-import com.BankTransactionLoadbalancer.Loadbalancer.global.common.Response;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import com.BankTransactionLoadbalancer.Loadbalancer.global.config.WebClientConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
@@ -24,10 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class BankTransactionService {
 
-    private final WebClient.Builder loadBalancedWebClientBuilder;
-    private final ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
-            .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(-1))
-            .build();
+    private final WebClient webClient;
     private static String baseUrl = "http://bank-transaction";
 
 
@@ -36,12 +29,10 @@ public class BankTransactionService {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file);
 
-        String uri = baseUrl+"/bt/upload";
+        String uri = baseUrl+"/bt/upload/loaddata";
         log.info("Making request to "+ uri);
 
-        return loadBalancedWebClientBuilder
-                .exchangeStrategies(exchangeStrategies)
-                .build()
+        return webClient
                 .post()
                 .uri(uri)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -57,9 +48,7 @@ public class BankTransactionService {
         String uri = baseUrl+"/bt/"+userId+"/transactions"+requestByUser.toString();
         log.info("Making request to "+uri);
 
-        return loadBalancedWebClientBuilder
-                .exchangeStrategies(exchangeStrategies)
-                .build()
+        return webClient
                 .get()
                 .uri(uri)
                 .accept(MediaType.APPLICATION_JSON)
@@ -74,9 +63,7 @@ public class BankTransactionService {
         String uri = baseUrl+"/bt"+requestByBank.toString();
         log.info("Making request to "+uri);
 
-        return loadBalancedWebClientBuilder
-                .exchangeStrategies(exchangeStrategies)
-                .build()
+        return webClient
                 .get()
                 .uri(uri)
                 .accept(MediaType.APPLICATION_JSON)

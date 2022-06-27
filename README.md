@@ -2,9 +2,8 @@
 
 ### 목차
 1. [개요](#1-개요)
-2. [일정](#2-일정)
-3. [문제해결 전략](#3-문제-해결-전략)
-4. [테스트 방법](#4-테스트-방법)
+2. [문제해결 전략](#2-문제-해결-전략)
+3. [테스트 내역](#3-테스트-내역)
 
 ### 1. 개요
 
@@ -28,15 +27,11 @@
 * QueryDSL
 * Mysql
 
-구체적인 서비스 아키텍처와 API 명세 등은 다음 [소개 문서](docs/1.Introduction.md)에서 확인 가능합니다. 
+구체적인 서비스 아키텍처와 API 명세 등은 다음 [소개 문서](docs/1.Introduction.md)에서 확인 가능합니다.
 
-### 2. 일정
+### 2. 문제해결 전략
 
-다음 [링크](docs/2.Schedule.md)에서 과제 수행 일정을 확인할 수 있습니다.
-
-### 3. 문제해결 전략
-
-다음 [링크](docs/3.ProblemSolving.md)에서 문제 해결 전략을 확인할 수 있습니다.
+다음 [링크](docs/2.ProblemSolving.md)에서 문제 해결 전략을 확인할 수 있습니다.
 
 #### 대용량 처리 전략
 
@@ -60,3 +55,6 @@ LoadBalancer의 API 서버 호출에 있어 WebClient와 RestTemplate을 두고 
 과제 요구사항은 Nullable 파라미터 구현을 요구하는데, 이는 JPQL, SQL보다 QueryDSL이 적합하다고 판단하였습니다.
 따라서 QueryDSL로 쿼리문을 동적으로 생성하여 사용하였으며 이는 다음 [클래스](./bank-transaction/src/main/java/com/BankTransactionApp/BankTransactionApp/web/banktransaction/repository/BankTransactionQueryRepository.java)에서 확인할 수 있습니다.
 
+### 3. 테스트 내역
+
+#### Load Data vs Bulk Insert

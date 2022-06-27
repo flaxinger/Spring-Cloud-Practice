@@ -21,3 +21,22 @@ services:
       - --general-log-file=/var/run/mysqld/query.log
       - --local-infile=1
       - --bulk_insert_buffer_size=256M
+      - --innodb-rollback-on-timeout=TRUE
+  bt-api:
+    image: flaxinger/bt-api
+    restart: always
+    container_name: BT-api
+    ports:
+      - '8081:8081'
+  bt-eureka:
+    image: flaxinger/bt-eureka
+    restart: always
+    container_name: BT-eureka
+    ports:
+      - '8070:8070'
+  bt-hystrix:
+    image: flaxinger/bt-hystrix
+    restart: always
+    container_name: BT-hystrix
+    ports:
+      - '8080:8080'

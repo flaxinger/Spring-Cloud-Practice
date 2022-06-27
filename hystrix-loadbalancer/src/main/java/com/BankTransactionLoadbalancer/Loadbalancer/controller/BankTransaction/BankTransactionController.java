@@ -7,6 +7,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -20,8 +21,9 @@ public class BankTransactionController {
 
     private final BankTransactionService bankTransactionService;
 
+
     @CircuitBreaker(name = "upload", fallbackMethod = "uploadCSVFB")
-    @PostMapping(value = "/upload")
+    @PostMapping(value = "/upload", produces = "application/json; charset=UTF8")
     public Mono<String> uploadCSV(@RequestPart("file") FilePart file) throws IOException {
 
         if(file==null) {
@@ -31,14 +33,14 @@ public class BankTransactionController {
         return bankTransactionService.uploadCSV(file);
     }
 
-    @GetMapping(value = "/{userId}/transactions")
+    @GetMapping(value = "/{userId}/transactions", produces = "application/json; charset=UTF8")
     @CircuitBreaker(name = "select", fallbackMethod = "findTransactionByUserFB")
     public Mono<String> findTransactionByUser(@PathVariable String userId,
                                               RequestDto.RequestByUser requestByUser) {
         return bankTransactionService.findTransactionByUser(userId, requestByUser);
     }
 
-    @GetMapping
+    @GetMapping(produces = "application/json; charset=UTF8")
     @CircuitBreaker(name = "select", fallbackMethod = "findTransactionByBankFB")
     public Mono<String> findTransactionByBank(RequestDto.RequestByBank requestByBank){
 
@@ -46,15 +48,18 @@ public class BankTransactionController {
     }
 
     public Mono<String> uploadCSVFB(FilePart file, Throwable t) throws IOException {
-        return Mono.just(Response.FALLBACK);
+        log.error(t.getMessage());
+        return Mono.just(Response.FALLBACK).cast(String.class);
     }
 
     public Mono<String> findTransactionByUserFB(String userId, RequestDto.RequestByUser requestByUser, Throwable t) {
-        return Mono.just(Response.FALLBACK);
+        log.error(t.getMessage());
+        return Mono.just(Response.FALLBACK).cast(String.class);
     }
 
     public Mono<String> findTransactionByBankFB(RequestDto.RequestByBank requestByBank, Throwable t){
-        return Mono.just(Response.FALLBACK);
+        log.error(t.getMessage());
+        return Mono.just(Response.FALLBACK).cast(String.class);
     }
 
 }
